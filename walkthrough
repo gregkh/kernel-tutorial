@@ -46,6 +46,10 @@ git show
 git format-patch
 
 git send-email
+	 --smtp-server /usr/bin/msmtp
+
+	 git config --global sendemail.smtpserver /usr/bin/msmtp
+
 
 
 
