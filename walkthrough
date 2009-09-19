@@ -1,0 +1,51 @@
+
+git stuff
+
+	git branch tutorial
+	git checkout tutorial
+	git status
+
+checkpatch stuff
+
+	./scripts/checkpatch.pl  (empty for help)
+	--terse
+	--file
+
+pick a file
+
+	checkpatch comedi file
+
+show errors vs warnings
+
+coding style
+	why?
+	what is it?
+	80 columns
+	tabs
+	brace placement
+	* placement
+	Documentation/CodingStyle
+
+
+edit the file
+
+change the line, run checkpatch.
+
+git diff
+
+git commit
+
+Good changelog comment
+
+signed-off-by:
+	what it is
+
+git show
+	--pretty=email
+
+git format-patch
+
+git send-email
+
+
+
