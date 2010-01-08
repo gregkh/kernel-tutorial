@@ -1,4 +1,78 @@
 
+First up, some basics about the source code control tool that the Linux
+kernel uses, git.  Git can be found in any Linux distro these days, and
+there are numerous good tutorials on how to use it and set it up
+availble on the web.  One good one is comes within git itself, and can
+be read by running:
+	$ man gittutorial
+after you have installed git on your machine.
+
+So run off and install git on your Linux system using the package
+manager you are comfortable with (personally, I use openSUSE, and a
+simple 'zypper install git' does everything that is needed.)
+
+Then start by cloning the main Linux kernel repository:
+
+	$ mkdir ~/linux
+	$ cd ~/linux
+	$ git clone git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux-2.6.git
+
+This will create the directory 'linux-2.6' within the linux/ directory.
+Everything we do from here out will be within that directory, so go into
+it to start with:
+	$ cd ~/linux/linux-2.6
+
+Now that you have the raw source code, how do you build it and install
+it on your system?  That is a much larger task, one that is beyond this
+article.  Luckily a whole book has been written on this topic, "Linux
+Kernel in a Nutshell", and can be found free online at:
+	http://www.kroah.com/lkn/
+if you don't want to purchase it.
+
+So go and get your kernel configured and building, and then come back
+here to figure out what to do next.
+
+
+-- Git tips
+
+Here are a few tips to use with git when working with the kernel source
+tree.  First off, never do your work on the same branch that Linus
+pushes to, called "master".  Create your own branch, and use that
+instead.  This ensures that any changes that are committed to Linus's
+branch upstream, will be able to be updated by you without any problems.
+
+To create a new branch called 'tutorial' and check it out, do the
+following:
+	$ git branch tutorial
+	$ git checkout tutorial
+That's it.  You are now in the 'tutorial' branch of your kernel
+repository, as can be seen by the following command:
+	$ git branch
+	   master
+	 * tutorial
+The '*' in front of the 'tutorial' name shows that you are on the
+correct branch.
+
+Now, let's go and make some changes to the kernel code.
+
+-- What to change
+
+Wait, you don't know what change you want to make to the Linux kernel
+source tree?  Everything is working just fine for you?  Well, don't
+dispair, the Linux kernel developers need all the help they can get, and
+have plenty of code in the tree that is just waiting to get cleaned up.
+
+The code in the drivers/staging/ tree consists of a lot of drivers that
+do not meet the normal Linux kernel coding guidelines.  The code is in
+that location so that other developers can help on cleaning it up, and
+getting it merged into the main portion of the Linux kernel tree.  
+
+
+
+
+
+
+
 
 git stuff
 
