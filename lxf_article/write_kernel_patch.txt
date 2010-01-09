@@ -2,7 +2,7 @@
 First up, some basics about the source code control tool that the Linux
 kernel uses, git.  Git can be found in any Linux distro these days, and
 there are numerous good tutorials on how to use it and set it up
-availble on the web.  One good one is comes within git itself, and can
+available on the web.  One good one is comes within git itself, and can
 be read by running:
 	$ man gittutorial
 after you have installed git on your machine.
@@ -59,7 +59,7 @@ Now, let's go and make some changes to the kernel code.
 
 Wait, you don't know what change you want to make to the Linux kernel
 source tree?  Everything is working just fine for you?  Well, don't
-dispair, the Linux kernel developers need all the help they can get, and
+despair, the Linux kernel developers need all the help they can get, and
 have plenty of code in the tree that is just waiting to get cleaned up.
 
 The code in the drivers/staging/ tree consists of a lot of drivers that
@@ -143,8 +143,8 @@ line-wrapping formatting just to fit into the 80 character limit, with
 all of your code on the right hand side of the screen, it is better to
 refactor the logic to prevent this from happening in the first place.
 Forcing an 80 character limit, also forces developers to break their
-logic up into tinyer, easier to understand chunks, which makes it easier
-to review and follow as well.
+logic up into smaller, easier to understand chunks, which makes it
+easier to review and follow as well.
 
 So yes, there is a method to the madness of the 80 character limit.
 
@@ -242,7 +242,7 @@ about it:
 
 
 I've removed a lot of the warnings from the above output, as there was a
-total of 76 of them, and they are all varients of the above ones.
+total of 76 of them, and they are all variants of the above ones.
 
 As can be seen, the checkpatch.pl tool points out where the code has
 gone beyond the 80 character limit, and where braces were used that they
@@ -380,7 +380,7 @@ After that, comes a few lines that show who made and reviewed the patch:
 	Acked-by: David Brownell <dbrownell@users.sourceforge.net>
 	Signed-off-by: Greg Kroah-Hartman <gregkh@suse.de>
 
-The term "Signed-off-by:" referrs to the ability for the developer to
+The term "Signed-off-by:" refers to the ability for the developer to
 properly claim that they are allowed to make this change, and offer it
 up under the acceptable license to be able for it to be added to the
 Linux kernel source tree.  This agreement is called the "Developer's
@@ -407,7 +407,7 @@ that every line of code in the Linux kernel, can be tracked back to the
 developer who created it, and the developers who reviewed it.
 
 
--- Createing our patch
+-- Creating our patch
 
 Now that we know how a patch is structured, we can create ours.
 
@@ -525,69 +525,65 @@ come up with the names and email addresses of the people, and mailing
 lists, that should be notified of this patch.
 
 Running this script on our patch, results in the following:
-	$ ./scripts/get_maintainer.pl 0001-Staging-comedi-fix-brace-coding-style-issue-in-ni_la.patch 
+	$ ./scripts/get_maintainer.pl 0001-Staging-comedi-fix-brace-coding-style-issue-in-ni_la.patch
 	Greg Kroah-Hartman <gregkh@suse.de>
 	Bill Pemberton <wfp5p@virginia.edu>
 	devel@driverdev.osuosl.org
 	linux-kernel@vger.kernel.org
 
+These are the addresses we need to send the patch to.
 
+-- Sending an email
 
+So, we should just bring up our favorite email client and send the patch
+off to the list of addresses that get_maintainer.pl told us about,
+right?
 
+Wait, not so fast.  Almost all common email clients do nasty things with
+patch files, wrapping lines when they should not be wrapped, changing
+tabs into spaces, eating spaces when they shouldn't, and all sorts of
+other nasty things (can you say base64-encoded attachments?)  Also, some
+email servers are known for mangling patches even if you happen to send
+the patch correctly.  Exchange, Groupwise, and Lotus Notes have this
+problem, so much so that most Linux kernel development teams at
+companies that use these servers have been forced to set up a Linux
+email server somewhere just to get patches out to the community in the
+proper way.
 
+For details about all of these common problems, and how to properly
+configure a large number of email clients, take a look at the file,
+Documentation/email-clients.txt in the kernel source tree.  It will help
+you out if you want to use your normal email client to send patches.
 
+If after reading the email-clients.txt file, your email client still
+does not work properly, git can again come to your rescue.
 
-git stuff
+Git has a way to send patches created with 'git format-patch' out
+through email to the developers who need it.  The 'git send-email
+command handles this all for us:
+	$ git send-email --to gregkh@suse.de --to wfp5p@virginia.edu \
+	   --cc devel@driverdev.osuosl.org \
+	   --cc linux-kernel@vger.kernel.org \
+	   0001-Staging-comedi-fix-brace-coding-style-issue-in-ni_la.patch
+will send the patch we created to the proper developers and CC: the
+proper mailing lists.
 
-	git branch tutorial
-	git checkout tutorial
-	git status
+For details on how to configure 'git send-email' to work with your SMTP
+server, or firewall, or anything else, see the man page:
+	$ git send-email --help
 
-checkpatch stuff
+-- Now what?
 
-	./scripts/checkpatch.pl  (empty for help)
-	--terse
-	--file
+Now that you have successfully created a patch and sent it off, what
+next?  The developer who you sent it to should respond by email in a few
+days with either a nice, "thanks for the patch, I have applied it." or
+possibly some comments for changes that you should make in order to get
+it accepted.  If you have not heard anything within a week, send it
+again, don't be worried about being annoying, persistence is the key to
+getting a busy kernel subsystem maintainer's attention.
 
-pick a file
-
-	checkpatch comedi file
-
-show errors vs warnings
-
-coding style
-	why?
-	what is it?
-	80 columns
-	tabs
-	brace placement
-	* placement
-	Documentation/CodingStyle
-
-
-edit the file
-
-change the line, run checkpatch.
-
-git diff
-
-git commit
-
-Good changelog comment
-
-signed-off-by:
-	what it is
-
-git show
-	--pretty=email
-
-git format-patch
-
-git send-email
-	 --smtp-server /usr/bin/msmtp
-
-	 git config --global sendemail.smtpserver /usr/bin/msmtp
-
-
-
-
+So there you have it, the simple steps involved in creating, committing,
+and sending off a Linux kernel patch.  Hopefully this means that
+everyone reading this article will soon send in their own kernel patch,
+and after having fun doing that, continuing to contribute to the largest
+software project in the history of computing.
