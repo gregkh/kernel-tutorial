@@ -226,15 +226,187 @@ and they work on an entire file, not just a single patch.
 So, let's pick a file in the kernel and see what checkpatch.pl tells us
 about it:
 
-	$ ./scripts/checkpatch.pl --file --terse drivers/staging/
+	$ ./scripts/checkpatch.pl --file --terse drivers/staging/comedi/drivers/ni_labpc.c
+	drivers/staging/comedi/drivers/ni_labpc.c:4: WARNING: line over 80 characters
+	...
+	drivers/staging/comedi/drivers/ni_labpc.c:486: WARNING: braces {} are not necessary for single statement blocks
+	drivers/staging/comedi/drivers/ni_labpc.c:489: WARNING: braces {} are not necessary for single statement blocks
+	...
+	drivers/staging/comedi/drivers/ni_labpc.c:587: WARNING: suspect code indent for conditional statements (8, 0)
+	...
+	drivers/staging/comedi/drivers/ni_labpc.c:743: WARNING: printk() should include KERN_ facility level
+	drivers/staging/comedi/drivers/ni_labpc.c:750: WARNING: kfree(NULL) is safe this check is probably not required
+	...
+	drivers/staging/comedi/drivers/ni_labpc.c:2028: WARNING: EXPORT_SYMBOL(foo); should immediately follow its function/variable
+	total: 0 errors, 76 warnings, 2028 lines checked
 
-This is because of one thing that all developers have in
-common, they have a brain.
+
+I've removed a lot of the warnings from the above output, as there was a
+total of 76 of them, and they are all varients of the above ones.
+
+As can be seen, the checkpatch.pl tool points out where the code has
+gone beyond the 80 character limit, and where braces were used that they
+were not needed, as well as a few other things that should be cleaned up
+in the file.
+
+Now that we know what needs to be done, fire up your favorite editor,
+and let us fix something.  How about the brace warning, that should be
+simple to resolve.
+
+Looking at the original code, lines 486-490 look like the following:
+
+        if (irq) {
+                printk(", irq %u", irq);
+        }
+        if (dma_chan) {
+                printk(", dma %u", dma_chan);
+        }
+
+A simple removal of those extra braces results in:
+        if (irq)
+                printk(", irq %u", irq);
+        if (dma_chan)
+                printk(", dma %u", dma_chan);
+
+Save the file, and run the checkpatch tool again to verify that the
+warning is gone:
+	$ ./scripts/checkpatch.pl --file --terse drivers/staging/comedi/drivers/ni_labpc.c | grep 486
+	$
+
+And of course build the file to verify that you did not break anything:
+	$ make drivers/staging/comedi/drivers/ni_labpc.o
+	  CHK     include/linux/version.h
+	  CHK     include/generated/utsrelease.h
+	  CALL    scripts/checksyscalls.sh
+	  CC [M]  drivers/staging/comedi/drivers/ni_labpc.o
+
+Yes, it still builds, so all is good.
+
+Great, you have now made your first kernel code fix!
+
+But, how do you take this change, and get it to the kernel developers in
+the format that they can apply it?
+
+-- More git fun
+
+As you edited this file within a git repository, your change to it is
+caught by git.  This can be seen by running the 'git status' command:
+	$ git status
+	# On branch tutorial
+	# Changed but not updated:
+	#   (use "git add <file>..." to update what will be committed)
+	#   (use "git checkout -- <file>..." to discard changes in working directory)
+	#
+	#	modified:   drivers/staging/comedi/drivers/ni_labpc.c
+	#
+	no changes added to commit (use "git add" and/or "git commit -a")
+
+This output shows that we are on the branch called 'tutorial', and that
+we have one file modified at the moment, the ni_labpc.c file.
+
+If we ask for git to show what we changed, we will see the actual lines:
+
+	$ git diff
+	diff --git a/drivers/staging/comedi/drivers/ni_labpc.c b/drivers/staging/comedi/drivers/ni_labpc.c
+	index dc3f398..a01e35d 100644
+	--- a/drivers/staging/comedi/drivers/ni_labpc.c
+	+++ b/drivers/staging/comedi/drivers/ni_labpc.c
+	@@ -483,12 +483,10 @@ int labpc_common_attach(struct comedi_device *dev, unsigned long iobase,
+	 
+	        printk("comedi%d: ni_labpc: %s, io 0x%lx", dev->minor, thisboard->name,
+	               iobase);
+	-       if (irq) {
+	+       if (irq)
+	                printk(", irq %u", irq);
+	-       }
+	-       if (dma_chan) {
+	+       if (dma_chan)
+	                printk(", dma %u", dma_chan);
+	-       }
+	        printk("\n");
+	 
+	        if (iobase == 0) {
+
+This output is in the format that the tool 'patch' can use to apply a
+change to a body of code.  The leading '-' and '+' on some lines show
+what lines are removed, and what lines are added.  Reading these diff
+outputs soon becomes natural, and is the format in which you need to
+send to the kernel maintainer to get the change accepted.
+
+--- Description, description, description
+
+The raw diff output shows what code is changed, but for every kernel
+patch, more information needs to be provided in order for it to be
+accepted.  This "metadata" is as important as the code changes, as it is
+used to show who made the change, why the change was made, and who
+reviewed the change.
+
+Here is a sample change that was accepted into the Linux kernel tree a
+while ago:
+
+	USB: otg: Fix bug on remove path without transceiver
+
+	In the case where a gadget driver is removed while no
+	transceiver was found at probe time, a bug in
+	otg_put_transceiver() will trigger.
+
+	Signed-off-by: Robert Jarzmik <robert.jarzmik@free.fr>
+	Acked-by: David Brownell <dbrownell@users.sourceforge.net>
+	Signed-off-by: Greg Kroah-Hartman <gregkh@suse.de>
+
+	--- a/drivers/usb/otg/otg.c
+	+++ b/drivers/usb/otg/otg.c
+	@@ -43,7 +43,8 @@ EXPORT_SYMBOL(otg_get_transceiver);
+	  void otg_put_transceiver(struct otg_transceiver *x)
+	  {
+	-        put_device(x->dev);
+	+        if (x)
+	+                put_device(x->dev);
+	  }
 
 
-The Linux kernel is no exception and describes al
+The first line of the change, is a one line summary of what part of the
+kernel the change is for, and very briefly, what it does:
+	USB: otg: Fix bug on remove path without tranceiver
 
+Then comes a more descriptive paragraph that explains why the change is
+needed:
+	In the case where a gadget driver is removed while no
+	transceiver was found at probe time, a bug in
+	otg_put_transceiver() will trigger.
 
+After that, comes a few lines that show who made and reviewed the patch:
+	Signed-off-by: Robert Jarzmik <robert.jarzmik@free.fr>
+	Acked-by: David Brownell <dbrownell@users.sourceforge.net>
+	Signed-off-by: Greg Kroah-Hartman <gregkh@suse.de>
+
+The term "Signed-off-by:" referrs to the ability for the developer to
+properly claim that they are allowed to make this change, and offer it
+up under the acceptable license to be able for it to be added to the
+Linux kernel source tree.  This agreement is called the "Developer's
+Certificate of Origin" and can be found in full in the file,
+Documentation/SubmittingPatches in the Linux kernel source tree.
+
+A brief summary of what the Developer's Certificate of Origin consists
+of, is the following:
+
+	(a) I created this change; or
+	(b) Based this on a previous work with a
+	      compatible license; or
+	(c) Provided to me by (a), (b), or (c) and not
+	     modified
+	(d) This contribution is public.
+
+It is a very simple to understand agreement, and ensures that everyone
+involved knows that the change is legally acceptable.
+
+Every developer who the patch goes through, adds their "Signed-off-by:"
+to it as the patch flows through the developer and maintainer chain
+before it is accepted into the Linux kernel source tree.  This ensures
+that every line of code in the Linux kernel, can be tracked back to the
+developer who created it, and the developers who reviewed it.
+
+Af
 
 
 
