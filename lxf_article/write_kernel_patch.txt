@@ -406,7 +406,131 @@ before it is accepted into the Linux kernel source tree.  This ensures
 that every line of code in the Linux kernel, can be tracked back to the
 developer who created it, and the developers who reviewed it.
 
-Af
+
+-- Createing our patch
+
+Now that we know how a patch is structured, we can create ours.
+
+First, tell git to check in the change that we made:
+	$ git commit drivers/staging/comedi/drivers/ni_labpc.c
+
+git will fire up your favorite editor and place you in it, with the
+following information already present:
+
+	# Please enter the commit message for your changes. Lines starting
+	# with '#' will be ignored, and an empty message aborts the commit.
+	# Explicit paths specified without -i nor -o; assuming --only paths...
+	# On branch tutorial
+	# Changes to be committed:
+	#   (use "git reset HEAD <file>..." to unstage)
+	#
+	#       modified:   drivers/staging/comedi/drivers/ni_labpc.c
+
+Create a summary line for the patch:
+	Staging: comedi: fix brace coding style issue in ni_labpc.c
+
+And then a more descriptive paragraph:
+
+	This is a patch to the ni_labpc.c file that fixes up a brace
+	warning found by the checkpatch.pl tool
+
+Then add your Signed-off-by: line:
+
+	Signed-off-by: Greg Kroah-Hartman <gregkh@suse.de>
+
+Then save the file and git will make the commit, printing out the
+following:
+	[tutorial 60de825] Staging: comedi: fix brace coding style issue in ni_labpc.c
+	 1 files changed, 2 insertions(+), 4 deletions(-)
+
+If you use the command 'git show HEAD' to see the most recent change, it
+will show you the full commit you made:
+	$ git show HEAD
+
+	commit 60de825964d99dee56108ce4c985a7cfc984e402
+	Author: Greg Kroah-Hartman <gregkh@suse.de>
+	Date:   Sat Jan 9 12:07:40 2010 -0800
+
+	    Staging: comedi: fix brace coding style issue in ni_labpc.c
+
+	    This is a patch to the ni_labpc.c file that fixes up a brace
+	    warning found by the checkpatch.pl tool
+
+	    Signed-off-by: My Name <my_name@my_email_domain>
+
+	diff --git a/drivers/staging/comedi/drivers/ni_labpc.c b/drivers/staging/comedi/drivers/ni_labpc.c
+	index dc3f398..a01e35d 100644
+	--- a/drivers/staging/comedi/drivers/ni_labpc.c
+	+++ b/drivers/staging/comedi/drivers/ni_labpc.c
+	@@ -483,12 +483,10 @@ int labpc_common_attach(struct comedi_device *dev, unsigned long iobase,
+	 
+		printk("comedi%d: ni_labpc: %s, io 0x%lx", dev->minor, thisboard->name,
+		       iobase);
+	-       if (irq) {
+	+       if (irq)
+			printk(", irq %u", irq);
+	-       }
+	-       if (dma_chan) {
+	+       if (dma_chan)
+			printk(", dma %u", dma_chan);
+	-       }
+		printk("\n");
+	 
+		if (iobase == 0) {
+
+
+You are now finished creating your first kernel patch!
+
+-- Getting your change into the kernel tree
+
+Now that you have created the patch, how do you get it into the kernel
+tree?  Linux kernel development primarily still happens through email,
+with patches being sent through email, and review happening that way.
+
+First off, let's export our patch in a format that we can use to email
+it to the maintainer who will be responsible for accepting our patch.
+
+To do that, once again, git has a command 'format-patch' that you can
+use:
+	$ git format-patch master..tutorial
+	0001-Staging-comedi-fix-brace-coding-style-issue-in-ni_la.patch
+
+In this command, we are creating all patches that exist in the
+difference from the branch 'master' (which is Linus's branch, remember
+way back at the beginning?) and our private branch, called 'tutorial'.
+This consists of only one change, our patch.  It is now in the file
+0001-Staging-comedi-fix-brace-coding-style-issue-in-ni_la.patch in our
+directory in a format that we can send off.
+
+Before we attempt to send the patch off, we should verify that our patch
+is in the correct format, and does not add any errors to the kernel tree
+as far as coding style issues go.  To do that, we use the checkpatch.pl
+script again:
+	$ ./scripts/checkpatch.pl 0001-Staging-comedi-fix-brace-coding-style-issue-in-ni_la.patch
+	total: 0 errors, 0 warnings, 14 lines checked
+
+	0001-Staging-comedi-fix-brace-coding-style-issue-in-ni_la.patch has no obvious style problems and is ready for submission.
+
+All is good, so it is safe to submit this change.
+
+But, who do we send it to?  Once again, the kernel developers have made
+this very simple, with a script that will tell you who needs to be
+notified.  This script is called, 'get_maintainer.pl', and is also in
+the scripts/ subdirectory in the kernel source tree.  This script looks
+at the files you have modified in the patch, and matches it up with the
+information in the MAINTAINTERS file in the kernel source tree that
+describes who is responsible for what portion of the kernel, as well as
+looking at the past history of the files being modified, in order to
+come up with the names and email addresses of the people, and mailing
+lists, that should be notified of this patch.
+
+Running this script on our patch, results in the following:
+	$ ./scripts/get_maintainer.pl 0001-Staging-comedi-fix-brace-coding-style-issue-in-ni_la.patch 
+	Greg Kroah-Hartman <gregkh@suse.de>
+	Bill Pemberton <wfp5p@virginia.edu>
+	devel@driverdev.osuosl.org
+	linux-kernel@vger.kernel.org
+
 
 
 
