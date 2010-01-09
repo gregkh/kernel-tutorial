@@ -65,7 +65,174 @@ have plenty of code in the tree that is just waiting to get cleaned up.
 The code in the drivers/staging/ tree consists of a lot of drivers that
 do not meet the normal Linux kernel coding guidelines.  The code is in
 that location so that other developers can help on cleaning it up, and
-getting it merged into the main portion of the Linux kernel tree.  
+getting it merged into the main portion of the Linux kernel tree.
+
+Every driver in the drivers/staging directory contains a TODO file that
+lists the things that need to be done on it in order for the code to be
+moved to the proper location in the kernel tree.  The majority of the
+drivers all contain the following line in their TODO file:
+	- fix checkpatch.pl issues
+
+Let's look into what this means and how you can help out with this task.
+
+-- Coding Style
+
+Every large body of code needs to have a set of coding style rules in
+order for it to be a viable project that a large number of developers
+can work on.  Numerous research studies have been made on this topic,
+and they all conclude that having a common guideline makes a very large
+difference.
+
+	It is not merely a matter of aesthetics that programs
+	should be written in a particular style.  Rather there
+	is a psychological basis for writing programs in a
+	conventional manner: programmers have strong expectations
+	that other programmers will follow these discourse rules.
+	If the rules are violated, then the utility afforded by
+	the expectations that programmers have built up over time
+	is effectively nullified.”
+                              – Soloway & Ehrlich
+
+What this means is that once programmers get used to a common style, the
+patterns of the code go away when it is looked at, and the meaning shows
+through very easily.
+
+The goal of any Linux kernel developer is to have other developers help
+find problems in their code, and by keeping all of the code in the same
+format, it makes it much easier for anyone else to pick it up, modify
+it, or notice bugs in it.  As every line of kernel code is reviewed by
+at least 2 developers before it is accepted, having a common style
+guideline is a very important thing.
+
+The Linux kernel coding style can be found in the file
+Documentation/CodingStyle in the kernel source tree.  The important
+thing to remember when reading it, is not that this style is somehow
+better than any other style, just that it is consistent.
+
+In order to help developers easily find coding style issues, the script
+scripts/checkpatch.pl in the kernel source tree has been developed.
+This script can point out problems very easily, and should always be run
+by a developer on their changes, instead of having a reviewer waste
+their time by pointing out problems later on.
+
+The drivers in the drivers/staging/ directory all usually have coding
+style issues as they were developed by people not familiar with the
+Linux kernel guidelines.  One of the first thing that needs to be done
+to the code, is to fix it up to follow the correct rules.
+
+And this is where you come in, by running the checkpatch.pl tool, you
+can find a large number of problems that need to be fixed.
+
+-- Specific rules
+
+Let us look at some of the common rules that are part of the kernel
+guidelines.
+
+--- Whitespace
+
+The first rule that everyone needs to follow is to use the 'tab'
+character, and not use spaces, to indent code.  Also, the 'tab'
+character should represent 8 spaces.  Following along with the 8
+character tab indentation, the code should not flow past the 80
+character line limit on the right side of the screen.
+
+Note, numerous developers have complained about the 80 character limit
+recently, and there are some places where it is acceptable to go beyond
+that limit.  If you find that you are being forced to do strange
+line-wrapping formatting just to fit into the 80 character limit, with
+all of your code on the right hand side of the screen, it is better to
+refactor the logic to prevent this from happening in the first place.
+Forcing an 80 character limit, also forces developers to break their
+logic up into tinyer, easier to understand chunks, which makes it easier
+to review and follow as well.
+
+So yes, there is a method to the madness of the 80 character limit.
+
+--- Braces
+
+Opening braces should be placed on the same line of the statement they
+are being used for, with one exception as show below.  Closing braces
+should be placed back at the original indentation.  This can be shown
+with the following example:
+
+	if (error != -ENODEV) {
+	        foo();
+	        bar();
+	}
+
+If you need to add an else statement to an if statement, put it on the
+same line as the closing brace, as shown here:
+
+	if (error != -ENODEV) {
+	        foo();
+	        bar();
+	} else {
+		report_error();
+		goto exit;
+	}
+
+If braces are not needed for a statement, do not put them in, as they
+are unnecessary:
+
+	if (error != -ENODEV)
+	        foo();
+	else
+		goto exit;
+
+The one exception for opening braces, is for function declarations,
+those go on a new line as shown here:
+
+	int function(int *baz)
+	{
+	        do_something(baz);
+	        return 0;
+	}
+
+-- checkpatch.pl
+
+With these simple whitespace and brace rules now understood, let us run
+the checkpatch.pl script on some code and see what it tells us:
+
+	$ ./scripts/checkpatch.pl --help
+	Usage: checkpatch.pl [OPTION]... [FILE]...
+	Version: 0.30
+
+	Options:
+	  -q, --quiet                quiet
+	  --no-tree                  run without a kernel tree
+	  --no-signoff               do not check for 'Signed-off-by' line
+	  --patch                    treat FILE as patchfile (default)
+	  --emacs                    emacs compile window format
+	  --terse                    one line per report
+	  -f, --file                 treat FILE as regular source file
+	  --subjective, --strict     enable more subjective tests
+	  --root=PATH                PATH to the kernel tree root
+	  --no-summary               suppress the per-file summary
+	  --mailback                 only produce a report in case of warnings/errors
+	  --summary-file             include the filename in summary
+	  --debug KEY=[0|1]          turn on/off debugging of KEY, where KEY is one of
+				     'values', 'possible', 'type', and 'attr' (default
+				     is all off)
+	  --test-only=WORD           report only warnings/errors containing WORD
+				     literally
+	  -h, --help, --version      display this help and exit
+
+	When FILE is - read standard input.
+
+Some common options that we will be using is the --terse and --file
+options, as those allow us to see the problems in a much simpler report,
+and they work on an entire file, not just a single patch.
+
+So, let's pick a file in the kernel and see what checkpatch.pl tells us
+about it:
+
+	$ ./scripts/checkpatch.pl --file --terse drivers/staging/
+
+This is because of one thing that all developers have in
+common, they have a brain.
+
+
+The Linux kernel is no exception and describes al
 
 
 
