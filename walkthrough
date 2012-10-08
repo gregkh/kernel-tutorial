@@ -1,17 +1,18 @@
+HOWTO
 
-git stuff
+git
 
-	git branch tutorial
-	git checkout tutorial
-	git status
+	clone linux-next
+	create your own branch off of the HEAD
+	work on that
 
-checkpatch stuff
-
+checkpatch
 	./scripts/checkpatch.pl  (empty for help)
 	--terse
 	--file
 
 pick a file
+	drivers/staging/
 
 	checkpatch comedi file
 
