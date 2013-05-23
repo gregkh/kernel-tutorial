@@ -1,8 +1,7 @@
-
 First up, some basics about the source code control tool that the Linux
 kernel uses, git.  Git can be found in any Linux distro these days, and
 there are numerous good tutorials on how to use it and set it up
-available on the web.  One good one is comes within git itself, and can
+available on the web.  One good one comes within git itself, and can
 be read by running:
 	$ man gittutorial
 after you have installed git on your machine.
@@ -117,7 +116,7 @@ their time by pointing out problems later on.
 
 The drivers in the drivers/staging/ directory all usually have coding
 style issues as they were developed by people not familiar with the
-Linux kernel guidelines.  One of the first thing that needs to be done
+Linux kernel guidelines.  One of the first things that needs to be done
 to the code, is to fix it up to follow the correct rules.
 
 And this is where you come in, by running the checkpatch.pl tool, you
@@ -367,7 +366,7 @@ while ago:
 
 The first line of the change, is a one line summary of what part of the
 kernel the change is for, and very briefly, what it does:
-	USB: otg: Fix bug on remove path without tranceiver
+	USB: otg: Fix bug on remove path without transceiver
 
 Then comes a more descriptive paragraph that explains why the change is
 needed:
@@ -518,7 +517,7 @@ this very simple, with a script that will tell you who needs to be
 notified.  This script is called, 'get_maintainer.pl', and is also in
 the scripts/ subdirectory in the kernel source tree.  This script looks
 at the files you have modified in the patch, and matches it up with the
-information in the MAINTAINTERS file in the kernel source tree that
+information in the MAINTAINERS file in the kernel source tree that
 describes who is responsible for what portion of the kernel, as well as
 looking at the past history of the files being modified, in order to
 come up with the names and email addresses of the people, and mailing
