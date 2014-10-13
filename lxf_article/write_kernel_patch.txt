@@ -178,7 +178,7 @@ are unnecessary:
 	else
 		goto exit;
 
-The one exception for opening braces, is for function declarations,
+The one exception for opening braces is for function declarations,
 those go on a new line as shown here:
 
 	int function(int *baz)
