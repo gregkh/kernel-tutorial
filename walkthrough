@@ -2,7 +2,7 @@ HOWTO
 
 git
 
-	clone linux-next
+	clone linux-next (man page - https://www.kernel.org/doc/man-pages/linux-next.html)
 	create your own branch off of the HEAD
 	work on that
 
